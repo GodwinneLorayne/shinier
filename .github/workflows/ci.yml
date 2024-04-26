@@ -9,7 +9,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022, macos-14]
+        include:
+          - os: ubuntu-22.04
+            hatch: bin/hatch
+          - os: windows-2022
+            hatch: bin/hatch.exe
+          - os: macos-14
+            hatch: bin/hatch.command
 
     runs-on: ${{ matrix.os }}
 
@@ -17,7 +23,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: create env
-      run: bin/hatch run dev-compiled:uv-pip-install
+      run: ${{ matrix.hatch }} run dev-compiled:uv-pip-install
 
     - name: run pytest
-      run: bin/hatch run dev-compiled:pytest
+      run: ${{ matrix.hatch }} run dev-compiled:pytest
