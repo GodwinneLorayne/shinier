@@ -1,4 +1,5 @@
 from enum import StrEnum, auto, unique
+from pydantic import BaseModel
 
 @unique
 class Concurrency(StrEnum):
@@ -6,3 +7,8 @@ class Concurrency(StrEnum):
     Sync = auto()
     Async = auto()
 
+
+class Callable(BaseModel):
+    """A callable object"""
+    name: str
+    concurrency: Concurrency

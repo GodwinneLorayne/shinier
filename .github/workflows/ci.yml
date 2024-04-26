@@ -11,5 +11,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: create env
+      run: bin/hatch run dev-compiled:uv-pip-install
+
     - name: run pytest
-      run: bin/hatch run dev:pytest
+      run: bin/hatch run dev-compiled:pytest

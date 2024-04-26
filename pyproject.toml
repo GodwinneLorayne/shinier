@@ -7,7 +7,14 @@ name = "shinier"
 description = "Keep your code shiny with shinier! Write the code that solves your problem, and let shinier take care of the rest."
 readme = "README.md"
 dynamic = ["version"]
-dependencies = ["pydantic>=2,<3"]
+dependencies = ["pydantic>=2,<3", "rich>=13,<14", "pluggy>=1,<2"]
+
+[project.optional-dependencies]
+dev = ["ruff==0.4.1", "pytest==8.1.1", "pytest-cov==5.0.0", "coverage[toml]==7.5.0"]
+uv = ["uv==0.1.38"]
+
+[project.scripts]
+shinier = "shinier.__main__:main"
 
 [tool.hatch.version]
 path = "src/shinier/__version__.py"
@@ -18,8 +25,28 @@ path = ".virtualenvs/default"
 
 [tool.hatch.envs.dev]
 python = "3.12"
-dependencies = ["ruff==0.4.1", "pytest==8.1.1", "pytest-cov==5.0.0", "coverage[toml]==7.5.0"]
+features = ["dev", "uv"]
 path = ".venv"
+
+[tool.hatch.envs.default-compiled]
+python = "3.12"
+features = ["uv"]
+path = ".virtualenvs/default-compiled"
+detached = true
+scripts.uv-pip-install = [
+    "uv pip install --requirement requirements.txt",
+    "uv pip install --no-deps --editable ."
+]
+
+[tool.hatch.envs.dev-compiled]
+python = "3.12"
+features = ["uv"]
+path = ".virtualenvs/dev-compiled"
+detached = true
+scripts.uv-pip-install = [
+    "uv pip install --requirement dev-requirements.txt",
+    "uv pip install --no-deps --editable ."
+]
 
 [tool.coverage.run]
 branch = true
