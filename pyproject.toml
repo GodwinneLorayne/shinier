@@ -72,4 +72,4 @@ exclude_also = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov"
+addopts = "--cov -vvv"
