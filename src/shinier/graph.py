@@ -1,8 +1,9 @@
-from typing import Literal, Union
-from pathlib import Path, PurePath
-from venv import logger
-from pydantic import BaseModel, Field
 from logging import getLogger
+from pathlib import Path, PurePath
+from typing import Annotated, Literal, Union
+from venv import logger
+
+from pydantic import BaseModel, Field
 
 # graph.py
 #
@@ -20,67 +21,114 @@ logger = getLogger(__name__)
 
 class DotPathModel(BaseModel):
     """A dot-separated path to a python object or for importing a python module Eg. 'package.module' or 'class.object'"""
-    parts: list[str] = Field(description="The parts of the path")
+
+    parts: Annotated[list[str], Field(description="The parts of the path")]
 
 
 class BaseLocationModel(BaseModel):
     """A location in the filesystem or in python"""
-    location_type: str = Field(default="", description="The type of the location")
+
+    location_type: Annotated[
+        str, Field(default="", description="The type of the location")
+    ]
 
 
 class FilesystemLocationModel(BaseLocationModel):
     """A location in the filesystem"""
-    location_type: Literal["filesystem"] = Field(default="filesystem", description="The type of the location")
-    file_path: Path = Field(description="The path of the file or directory")
+
+    location_type: Annotated[
+        Literal["filesystem"], Field(description="The type of the location")
+    ] = "filesystem"
+    file_path: Annotated[Path, Field(description="The path of the file or directory")]
 
 
 class PythonModuleLocationModel(BaseLocationModel):
     """A location in a python module"""
-    location_type: Literal["python_module"] = Field(default="python_module", description="The type of the location")
-    file_path: Path = Field(description="The path of the python module file")
-    import_root: Path = Field(description="The path of the directory from which the module is imported")
-    import_path: DotPathModel = Field(description="The import path of the python module")
+
+    location_type: Annotated[
+        Literal["python_module"], Field(description="The type of the location")
+    ] = "python_module"
+    file_path: Annotated[Path, Field(description="The path of the python module file")]
+    import_root: Annotated[
+        Path,
+        Field(
+            description="The path of the directory from which the module is imported"
+        ),
+    ]
+    import_path: Annotated[
+        DotPathModel, Field(description="The import path of the python module")
+    ]
 
 
 class PythonObjectLocationModel(BaseLocationModel):
     """A location in a python object"""
-    location_type: Literal["python_object"] = Field(default="python_object", description="The type of the location")
-    file_path: Path = Field(description="The path of the python module file")
-    import_root: Path = Field(description="The path of the directory from which the module is imported")
-    import_path: DotPathModel = Field(description="The import path of the python module")
-    ref_path: DotPathModel = Field(description="The reference path of the python object")
+
+    location_type: Annotated[
+        Literal["python_object"],
+        Field(default="python_object", description="The type of the location"),
+    ]
+    file_path: Annotated[Path, Field(description="The path of the python module file")]
+    import_root: Annotated[
+        Path,
+        Field(
+            description="The path of the directory from which the module is imported"
+        ),
+    ]
+    import_path: Annotated[
+        DotPathModel, Field(description="The import path of the python module")
+    ]
+    ref_path: Annotated[
+        DotPathModel, Field(description="The reference path of the python object")
+    ]
 
 
-LocationModel = Union[FilesystemLocationModel, PythonModuleLocationModel, PythonObjectLocationModel]
+LocationModel = Union[
+    FilesystemLocationModel, PythonModuleLocationModel, PythonObjectLocationModel
+]
 
 
 class NameModel(BaseModel):
     """A name for a graph node"""
-    short_name: str = Field(description="The name of the object")
-    long_name: str = Field(default="", description="The long name of the object")
-    aliases: list[str] = Field(default_factory=list, description="The aliases of the object")
+
+    short_name: Annotated[str, Field(description="The name of the object")]
+    long_name: Annotated[
+        str, Field(default="", description="The long name of the object")
+    ]
+    aliases: Annotated[
+        list[str], Field(default_factory=list, description="The aliases of the object")
+    ]
 
 
 class BaseNodeModel(BaseModel):
     """A node in the graph"""
-    node_type: str = Field(default="", description="The type of the node")
+
+    node_type: Annotated[str, Field(description="The type of the node")] = ""
     location: LocationModel
     name: NameModel
 
 
 class FilesystemNodeModel(BaseNodeModel):
     """A node in the graph representing a filesystem object"""
-    node_type: Literal["filesystem"] = Field(default="filesystem", description="The type of the node")
+
+    node_type: Annotated[
+        Literal["filesystem"], Field(description="The type of the node")
+    ] = "filesystem"
 
 
 class PythonModuleNodeModel(BaseNodeModel):
     """A node in the graph representing a python module"""
-    node_type: Literal["python_module"] = Field(default="python_module", description="The type of the node")
+
+    node_type: Annotated[
+        Literal["python_module"], Field(description="The type of the node")
+    ] = "python_module"
 
 
 class PythonObjectNodeModel(BaseNodeModel):
     """A node in the graph representing a python object"""
-    node_type: Literal["python_object"] = Field(default="python_object", description="The type of the node")
+
+    node_type: Annotated[
+        Literal["python_object"], Field(description="The type of the node")
+    ] = "python_object"
 
 
 NodeModel = Union[FilesystemNodeModel, PythonModuleNodeModel, PythonObjectNodeModel]
@@ -88,8 +136,15 @@ NodeModel = Union[FilesystemNodeModel, PythonModuleNodeModel, PythonObjectNodeMo
 
 class GraphModel(BaseModel):
     """A graph data structure"""
-    nodes: list[NodeModel] = Field(default_factory=list, description="The nodes in the graph")
-    edges: dict[int, list[int]] = Field(default_factory=dict, description="The edges in the graph")
+
+    nodes: Annotated[
+        list[NodeModel],
+        Field(default_factory=list, description="The nodes in the graph"),
+    ]
+    edges: Annotated[
+        dict[int, list[int]],
+        Field(default_factory=dict, description="The edges in the graph"),
+    ]
 
 
 # ================================================================================
@@ -99,6 +154,7 @@ class GraphModel(BaseModel):
 
 class PathDoesNotExistError(Exception):
     """Raised when a path does not exist"""
+
     def __init__(self, path: Path):
         self.path = path
         super().__init__(f"Path does not exist: {path}")
@@ -106,6 +162,7 @@ class PathDoesNotExistError(Exception):
 
 class PathIsNotFileOrDirectoryError(Exception):
     """Raised when a path is not a file or directory"""
+
     def __init__(self, path: Path):
         self.path = path
         super().__init__(f"Path is not a file or directory: {path}")
@@ -113,6 +170,7 @@ class PathIsNotFileOrDirectoryError(Exception):
 
 class PathIsNotPythonModuleError(Exception):
     """Raised when a path is not a python module"""
+
     def __init__(self, path: Path):
         self.path = path
         super().__init__(f"Path is not a python module: {path}")
@@ -125,6 +183,7 @@ class PathIsNotPythonModuleError(Exception):
 
 class Graph(GraphModel):
     """A graph data structure for representing objects in the filesystem and in python"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -141,6 +200,7 @@ class Graph(GraphModel):
         if parent_index not in self.edges:
             self.edges[parent_index] = []
         self.edges[parent_index].append(child_index)
+
 
 # ================================================================================
 # Free Functions
@@ -186,17 +246,13 @@ def node_from_module_path(path: Path) -> PythonModuleNodeModel:
         import_root = import_root.parent
 
     return PythonModuleNodeModel(
-            location=PythonModuleLocationModel(
-               file_path=path,
-                import_root=import_root,
-                import_path=DotPathModel(parts=parts)
-            ),
-            name=NameModel(
-                short_name=short_name,
-                long_name=long_name,
-                aliases=[]
-            )
-        )
+        location=PythonModuleLocationModel(
+            file_path=path,
+            import_root=import_root,
+            import_path=DotPathModel(parts=parts),
+        ),
+        name=NameModel(short_name=short_name, long_name=long_name, aliases=[]),
+    )
 
 
 def node_from_path(path: Path) -> NodeModel:
@@ -217,28 +273,16 @@ def node_from_path(path: Path) -> NodeModel:
             return node_from_module_path(path / "__init__.py")
 
         return FilesystemNodeModel(
-            location=FilesystemLocationModel(
-                file_path=path
-            ),
-            name=NameModel(
-                short_name=path.name,
-                long_name=path.name,
-                aliases=[]
-            )
+            location=FilesystemLocationModel(file_path=path),
+            name=NameModel(short_name=path.name, long_name=path.name, aliases=[]),
         )
 
     if is_path_python_module(path):
         return node_from_module_path(path)
 
     return FilesystemNodeModel(
-        location=FilesystemLocationModel(
-            file_path=path
-        ),
-        name=NameModel(
-            short_name=path.stem,
-            long_name=path.name,
-            aliases=[]
-        )
+        location=FilesystemLocationModel(file_path=path),
+        name=NameModel(short_name=path.stem, long_name=path.name, aliases=[]),
     )
 
 
@@ -254,7 +298,11 @@ def child_nodes_from_node(node: NodeModel) -> list[NodeModel]:
     if isinstance(node, PythonModuleNodeModel):
         path = node.location.file_path
         if is_path_init_module(path):
-            return [node_from_path(child) for child in path.parent.iterdir() if child != path]
+            return [
+                node_from_path(child)
+                for child in path.parent.iterdir()
+                if child != path
+            ]
         return []
 
     return []

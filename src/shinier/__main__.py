@@ -1,5 +1,7 @@
 from logging import getLogger
+
 import shinier.logging
+
 
 def main():
     shinier.logging.configure()

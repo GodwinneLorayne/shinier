@@ -1,4 +1,5 @@
-from logging import getLogger, basicConfig, NOTSET, INFO
+from logging import INFO, NOTSET, basicConfig, getLogger
+
 from rich.logging import RichHandler
 
 
@@ -8,7 +9,7 @@ def configure():
         level=NOTSET,
         format="%(message)s",
         datefmt="[%X]",
-        handlers=[RichHandler(rich_tracebacks=True)]
+        handlers=[RichHandler(rich_tracebacks=True)],
     )
 
     getLogger("shinier").setLevel(INFO)
