@@ -6,6 +6,7 @@ build-backend = "hatchling.build"
 name = "shinier"
 description = "Keep your code shiny with shinier! Write the code that solves your problem, and let shinier take care of the rest."
 readme = "README.md"
+requires-python = ">=3.12"
 dynamic = ["version"]
 dependencies = ["pydantic>=2,<3", "rich>=13,<14", "pluggy>=1,<2"]
 
