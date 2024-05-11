@@ -4,7 +4,7 @@ import inspect
 from enum import Enum, auto, unique
 from typing import Annotated, Any, Callable, Optional, Sequence, Type
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 # ==========================================================================================
 #                         Constants
@@ -29,7 +29,7 @@ class ParameterKind(Enum):
 
 
 # ==========================================================================================
-#                         Models
+#                         Models - support serialization and deserialization
 # ==========================================================================================
 
 
@@ -58,6 +58,29 @@ class Signature(BaseModel):
         Optional[ReturnAnnotation],
         Field(description="The return annotation of the callable"),
     ]
+
+
+# ==========================================================================================
+#                        Runtime Classes - no serialization or deserialization guarantees
+# ==========================================================================================
+
+
+class RuntimeSignature(Signature):
+    """A callable signature"""
+
+    model_config = ConfigDict(extra="allow")
+
+    def __init__(
+        self,
+        parameters: Sequence[Parameter],
+        return_annotation: Optional[ReturnAnnotation],
+        signature: inspect.Signature,
+    ):
+        super().__init__(
+            parameters=parameters,
+            return_annotation=return_annotation,
+        )
+        self.signature = signature
 
 
 # ==========================================================================================
@@ -98,7 +121,7 @@ def convert_parameter_kind(kind: Any) -> ParameterKind:
         raise ValueError(f"Unknown ParameterKind: {kind}")
 
 
-def inspect_callable(func: Callable) -> Signature:
+def inspect_callable(func: Callable) -> RuntimeSignature:
     """Inspect a Callable and return its Signature"""
 
     if not func:
@@ -126,4 +149,8 @@ def inspect_callable(func: Callable) -> Signature:
         for parameter in inspect_signature.parameters.values()
     ]
 
-    return Signature(parameters=parameters, return_annotation=return_annotation)
+    return RuntimeSignature(
+        parameters=parameters,
+        return_annotation=return_annotation,
+        signature=inspect_signature,
+    )
